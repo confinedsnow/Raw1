@@ -1,236 +1,171 @@
-local Players       = game:GetService("Players")
-local RunService    = game:GetService("RunService")
-local TweenService  = game:GetService("TweenService")
+local _0x1a2b=string.char local _0x3c4d=table.concat local _0x5e6f=string.byte
+local function _0xDEC(_s)local r={}for i=1,#_s do r[i]=string.char(string.byte(_s,i)-3)end return table.concat(r)end
+local function _0xENC(_s)local r={}for i=1,#_s do r[i]=string.char(string.byte(_s,i)+3)end return table.concat(r)end
 
-local player = Players.LocalPlayer
-while not player do task.wait() player = Players.LocalPlayer end
+local _={_0xDEC("Sod|huvv"),_0xDEC("UxqVhuylfh"),_0xDEC("WzhhqVhuylfh"),_0xDEC("Sod|huJxl"),_0xDEC("KhduwEhdw"),_0xDEC("KxpdqrlgUrrwSduw"),_0xDEC("Kxpdqrlg")}
 
-local playerGui = player:WaitForChild("PlayerGui")
+local __=game.GetService
+local function _G(s)return __(game,s)end
 
-local old = playerGui:FindFirstChild("AutoToggleGui")
-if old then old:Destroy() end
+local _a=_G(_[1])
+local _b=_G(_[2])
+local _c=_G(_[3])
 
--- ══════════════════════════════════════════════════
--- STATE
--- ══════════════════════════════════════════════════
-local autoResetEnabled    = false
-local autoReturnEnabled   = false
-local abandonedEnabled    = false
-local lastCFrame          = nil
-local savedDeathCFrame    = nil
-local isAlive             = false
-local abandonedTriggered  = false
-local characterConnections = {}
+local _d=_a.LocalPlayer
+repeat _b.Heartbeat:Wait()_d=_a.LocalPlayer until _d
 
-local function getCharRoot()
-	local c = player.Character
-	return c and c:FindFirstChild("HumanoidRootPart")
+local _e=_d:WaitForChild(_0xDEC("Sod|huJxl"))
+local _f=_e:FindFirstChild(_0xDEC("DxwrWrjjohJxl"))
+if _f then _f:Destroy() end
+
+local _h,_i,_j,_k,_l,_m,_n,_o={},{},{},{},{},{},{},{}
+local _p=false local _q=false local _r=false
+local _s=nil local _t=nil local _u=false local _v=false
+
+local function _w()
+    local _x=_d.Character
+    return _x and _x:FindFirstChild(_0xDEC("KxpdqrlgUrrwSduw"))
+end
+local function _y()
+    local _x=_d.Character
+    return _x and _x:FindFirstChildOfClass(_0xDEC("Kxpdqrlg"))
 end
 
-local function getHumanoid()
-	local c = player.Character
-	return c and c:FindFirstChildOfClass("Humanoid")
+local function _z()
+    local _A=_w()
+    if not _A then return nil end
+    local _B=nil local _C=-1
+    for _,_D in ipairs(workspace:GetDescendants())do
+        if _D:IsA(_0xDEC("VsdзqOrfdwlrq")) or _D:IsA("SpawnLocation") then
+            local _E=(_A.Position-_D.Position).Magnitude
+            if _E>_C then _C=_E _B=_D end
+        end
+    end
+    return _B
 end
 
--- ══════════════════════════════════════════════════
--- FIND FURTHEST SPAWN
--- ══════════════════════════════════════════════════
-local function getFurthestSpawn()
-	local root = getCharRoot()
-	if not root then return nil end
+-- GUI construction obfuscated
+local _F={}
+local _G2=Instance.new
+local _H=_0xDEC("VfuhhqJxl")
+local _I=_G2(_H)
+_I.Name=_0xDEC("DxwrWrjjohJxl")
+_I.ResetOnSpawn=not true
+_I.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+_I.Enabled=not false
+_I.IgnoreGuiInset=not false
 
-	local furthestSpawn = nil
-	local furthestDist  = -1
+local _J=_G2("Frame",_I)
+_J.Size=UDim2.new(0,210,0,172)
+_J.Position=UDim2.new(0,16,0,50)
+_J.BackgroundColor3=Color3.fromRGB(10,12,20)
+_J.BorderSizePixel=0
+_G2("UICorner",_J).CornerRadius=UDim.new(0,14)
 
-	-- Check all SpawnLocations in the workspace
-	for _, obj in ipairs(workspace:GetDescendants()) do
-		if obj:IsA("SpawnLocation") then
-			local dist = (root.Position - obj.Position).Magnitude
-			if dist > furthestDist then
-				furthestDist  = dist
-				furthestSpawn = obj
-			end
-		end
-	end
+local _K=_G2("Frame",_J)
+_K.Size=UDim2.new(1,0,0,3)
+_K.BackgroundColor3=Color3.fromRGB(99,179,255)
+_K.BorderSizePixel=0
+_G2("UICorner",_K).CornerRadius=UDim.new(0,14)
 
-	return furthestSpawn
+local _L=_G2("UIPadding",_J)
+_L.PaddingTop=UDim.new(0,14)
+_L.PaddingBottom=UDim.new(0,10)
+_L.PaddingLeft=UDim.new(0,12)
+_L.PaddingRight=UDim.new(0,12)
+
+local _M=_G2("UIListLayout",_J)
+_M.SortOrder=Enum.SortOrder.LayoutOrder
+_M.Padding=UDim.new(0,8)
+
+local _N=_c -- TweenService
+local function _O(_P,_Q,_R)
+    local _S=_G2("TextButton",_J)
+    _S.Size=UDim2.new(1,0,0,38)
+    _S.BackgroundColor3=Color3.fromRGB(22,26,42)
+    _S.TextColor3=Color3.fromRGB(180,195,230)
+    _S.Font=Enum.Font.GothamMedium
+    _S.TextSize=13
+    _S.Text="\x E2\x AC\xA1  ".._P..": OFF"
+    _S.Text="⬜  ".._P..": OFF"
+    _S.AutoButtonColor=false
+    _S.BorderSizePixel=0
+    _S.LayoutOrder=_R
+    _G2("UICorner",_S).CornerRadius=UDim.new(0,9)
+    local _T=_G2("UIStroke",_S)
+    _T.Color=Color3.fromRGB(40,50,80)
+    _T.Thickness=1
+    _S.MouseEnter:Connect(function()
+        _N:Create(_T,TweenInfo.new(0.15),{Color=Color3.fromRGB(99,179,255),Transparency=0.4}):Play()
+    end)
+    _S.MouseLeave:Connect(function()
+        _N:Create(_T,TweenInfo.new(0.15),{Color=Color3.fromRGB(40,50,80),Transparency=0}):Play()
+    end)
+    return _S
 end
 
--- ══════════════════════════════════════════════════
--- GUI
--- ══════════════════════════════════════════════════
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name           = "AutoToggleGui"
-screenGui.ResetOnSpawn   = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Enabled        = true
-screenGui.IgnoreGuiInset = true
+local _labels={_0xDEC("Dxwr#Uhvhw"),_0xDEC("Dxwr#Uhwxuq"),_0xDEC("Dedqgrqhg#Prgh")}
+for i=1,3 do _labels[i]=_labels[i]:gsub("#"," ") end
 
-local toggleFrame = Instance.new("Frame", screenGui)
-toggleFrame.Size              = UDim2.new(0, 210, 0, 172)
-toggleFrame.Position          = UDim2.new(0, 16, 0, 50)
-toggleFrame.BackgroundColor3  = Color3.fromRGB(10, 12, 20)
-toggleFrame.BorderSizePixel   = 0
-Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 14)
+local _U=_O(_labels[1],nil,1)
+local _V=_O(_labels[2],nil,2)
+local _W=_O(_labels[3],nil,3)
 
-local strip = Instance.new("Frame", toggleFrame)
-strip.Size             = UDim2.new(1, 0, 0, 3)
-strip.BackgroundColor3 = Color3.fromRGB(99, 179, 255)
-strip.BorderSizePixel  = 0
-Instance.new("UICorner", strip).CornerRadius = UDim.new(0, 14)
-
-local tPad = Instance.new("UIPadding", toggleFrame)
-tPad.PaddingTop    = UDim.new(0, 14)
-tPad.PaddingBottom = UDim.new(0, 10)
-tPad.PaddingLeft   = UDim.new(0, 12)
-tPad.PaddingRight  = UDim.new(0, 12)
-
-local tList = Instance.new("UIListLayout", toggleFrame)
-tList.SortOrder = Enum.SortOrder.LayoutOrder
-tList.Padding    = UDim.new(0, 8)
-
-local function makeToggle(label, order)
-	local btn = Instance.new("TextButton", toggleFrame)
-	btn.Size             = UDim2.new(1, 0, 0, 38)
-	btn.BackgroundColor3 = Color3.fromRGB(22, 26, 42)
-	btn.TextColor3       = Color3.fromRGB(180, 195, 230)
-	btn.Font             = Enum.Font.GothamMedium
-	btn.TextSize         = 13
-	btn.Text             = "⬜  " .. label .. ": OFF"
-	btn.AutoButtonColor  = false
-	btn.BorderSizePixel  = 0
-	btn.LayoutOrder      = order
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 9)
-
-	local stroke = Instance.new("UIStroke", btn)
-	stroke.Color     = Color3.fromRGB(40, 50, 80)
-	stroke.Thickness = 1
-
-	btn.MouseEnter:Connect(function()
-		TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Color3.fromRGB(99,179,255), Transparency = 0.4}):Play()
-	end)
-	btn.MouseLeave:Connect(function()
-		TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Color3.fromRGB(40,50,80), Transparency = 0}):Play()
-	end)
-	return btn
+local function _X(_Y,_Z,_0)
+    if _0 then
+        _Y.Text="✅  ".._Z..": ON"
+        _Y.BackgroundColor3=Color3.fromRGB(20,90,45)
+        _Y.TextColor3=Color3.fromRGB(130,255,160)
+    else
+        _Y.Text="⬜  ".._Z..": OFF"
+        _Y.BackgroundColor3=Color3.fromRGB(22,26,42)
+        _Y.TextColor3=Color3.fromRGB(180,195,230)
+    end
 end
 
-local resetBtn    = makeToggle("Auto Reset",    1)
-local returnBtn   = makeToggle("Auto Return",   2)
-local abandonBtn  = makeToggle("Abandoned Mode",3)
+_U.MouseButton1Click:Connect(function()_p=not _p _X(_U,_labels[1],_p)end)
+_V.MouseButton1Click:Connect(function()_q=not _q _X(_V,_labels[2],_q)end)
+_W.MouseButton1Click:Connect(function()_r=not _r _X(_W,_labels[3],_r)_v=false end)
 
-local function setToggle(btn, label, on)
-	if on then
-		btn.Text             = "✅  " .. label .. ": ON"
-		btn.BackgroundColor3 = Color3.fromRGB(20, 90, 45)
-		btn.TextColor3       = Color3.fromRGB(130, 255, 160)
-	else
-		btn.Text             = "⬜  " .. label .. ": OFF"
-		btn.BackgroundColor3 = Color3.fromRGB(22, 26, 42)
-		btn.TextColor3       = Color3.fromRGB(180, 195, 230)
-	end
+_I.Parent=_e
+
+local _10={}
+local function _11()
+    for _,c in ipairs(_10)do pcall(function()c:Disconnect()end)end
+    _10={}
 end
 
-resetBtn.MouseButton1Click:Connect(function()
-	autoResetEnabled = not autoResetEnabled
-	setToggle(resetBtn, "Auto Reset", autoResetEnabled)
-end)
-
-returnBtn.MouseButton1Click:Connect(function()
-	autoReturnEnabled = not autoReturnEnabled
-	setToggle(returnBtn, "Auto Return", autoReturnEnabled)
-end)
-
-abandonBtn.MouseButton1Click:Connect(function()
-	abandonedEnabled = not abandonedEnabled
-	setToggle(abandonBtn, "Abandoned Mode", abandonedEnabled)
-	-- Reset trigger so it can fire again fresh
-	abandonedTriggered = false
-end)
-
-screenGui.Parent = playerGui
-
--- ══════════════════════════════════════════════════
--- CHARACTER LIFECYCLE
--- ══════════════════════════════════════════════════
-local function clearCharacterConnections()
-	for _, conn in ipairs(characterConnections) do
-		pcall(function() conn:Disconnect() end)
-	end
-	characterConnections = {}
+local function _12(_13)
+    _11()
+    _u=false _v=false
+    local _14=_13:WaitForChild(_0xDEC("Kxpdqrlg"),10)
+    local _15=_13:WaitForChild(_0xDEC("KxpdqrlgUrrwSduw"),10)
+    if not _14 or not _15 then return end
+    if _q and _t then
+        local _cf=_t _t=nil
+        task.defer(function()
+            if _15 and _15.Parent then pcall(function()_15.CFrame=_cf end)end
+        end)
+    else _t=nil end
+    _u=true
+    table.insert(_10,_b.Heartbeat:Connect(function()
+        if _u and _15 and _15.Parent then _s=_15.CFrame end
+    end))
+    table.insert(_10,_14.HealthChanged:Connect(function(_hp)
+        if not _u then return end
+        if _p and _hp<=1 then _u=false pcall(function()_14.Health=0 end)return end
+        if _r and not _v and _hp<=25 and _hp>0 then
+            _v=true
+            local _sp=_z()
+            if _sp then pcall(function()_15.CFrame=CFrame.new(_sp.Position+Vector3.new(0,5,0))end)end
+        end
+    end))
+    table.insert(_10,_14.Died:Connect(function()
+        _u=false
+        if _q and _s then _t=_s end
+        _v=false
+    end))
 end
 
-local function setupCharacter(character)
-	clearCharacterConnections()
-	isAlive          = false
-	abandonedTriggered = false
-
-	local humanoid = character:WaitForChild("Humanoid", 10)
-	local rootPart  = character:WaitForChild("HumanoidRootPart", 10)
-	if not humanoid or not rootPart then return end
-
-	-- Auto Return teleport on spawn
-	if autoReturnEnabled and savedDeathCFrame then
-		local cf = savedDeathCFrame
-		savedDeathCFrame = nil
-		task.defer(function()
-			if rootPart and rootPart.Parent then
-				pcall(function() rootPart.CFrame = cf end)
-			end
-		end)
-	else
-		savedDeathCFrame = nil
-	end
-
-	isAlive = true
-
-	-- Track position
-	table.insert(characterConnections, RunService.Heartbeat:Connect(function()
-		if isAlive and rootPart and rootPart.Parent then
-			lastCFrame = rootPart.CFrame
-		end
-	end))
-
-	-- Health watcher — handles Auto Reset AND Abandoned Mode
-	table.insert(characterConnections, humanoid.HealthChanged:Connect(function(health)
-		if not isAlive then return end
-
-		-- Auto Reset
-		if autoResetEnabled and health <= 1 then
-			isAlive = false
-			pcall(function() humanoid.Health = 0 end)
-			return
-		end
-
-		-- Abandoned Mode: TP to furthest spawn at 25 hp
-		if abandonedEnabled and not abandonedTriggered and health <= 25 and health > 0 then
-			abandonedTriggered = true
-			local spawn = getFurthestSpawn()
-			if spawn then
-				pcall(function()
-					rootPart.CFrame = CFrame.new(
-						spawn.Position + Vector3.new(0, 5, 0)
-					)
-				end)
-			end
-		end
-	end))
-
-	-- Death handler
-	table.insert(characterConnections, humanoid.Died:Connect(function()
-		isAlive = false
-		if autoReturnEnabled and lastCFrame then
-			savedDeathCFrame = lastCFrame
-		end
-		-- Reset abandoned trigger for next life
-		abandonedTriggered = false
-	end))
-end
-
-player.CharacterAdded:Connect(function(char)
-	task.spawn(setupCharacter, char)
-end)
-
-if player.Character then
-	task.spawn(setupCharacter, player.Character)
-end
+_d.CharacterAdded:Connect(function(_c2)task.spawn(_12,_c2)end)
+if _d.Character then task.spawn(_12,_d.Character)end
