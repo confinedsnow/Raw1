@@ -35,16 +35,16 @@ local SPOOF_RATE         = 0.05
 local SPEED_AMOUNT       = 32
 local ANTIAIM_SPEED      = 10
 
-local ghostParts         = {}
-local positionHistory    = {}
+local ghostParts           = {}
+local positionHistory      = {}
 local characterConnections = {}
-local desyncConnection   = nil
-local lastCFrame         = nil
-local savedDeathCFrame   = nil
-local isAlive            = false
-local abandonedTriggered = false
-local lastSpoof          = 0
-local antitick           = 0
+local desyncConnection     = nil
+local lastCFrame           = nil
+local savedDeathCFrame     = nil
+local isAlive              = false
+local abandonedTriggered   = false
+local lastSpoof            = 0
+local antitick             = 0
 
 -- ============ FAKE PART ============
 local fakePart = Instance.new("Part")
@@ -92,10 +92,7 @@ local function startDesync(char, hrp)
             cleanupGhosts()
             return
         end
-
         local clientCFrame = hrp.CFrame
-
-        -- Ghost snapshot
         local snapshot = {}
         for part in pairs(ghostParts) do
             if part and part.Parent then snapshot[part] = part.CFrame end
@@ -104,7 +101,6 @@ local function startDesync(char, hrp)
         while positionHistory[1] and tick() - positionHistory[1].time > 1 do
             table.remove(positionHistory, 1)
         end
-
         if SHOW_GHOST then
             local targetTime = tick() - DESYNC_DELAY
             local best = nil
@@ -124,14 +120,11 @@ local function startDesync(char, hrp)
                 if ghost and ghost.Parent then ghost.Transparency = 1 end
             end
         end
-
         if DESYNC_ENABLED then
             task.defer(function()
                 if hrp and hrp.Parent then hrp.CFrame = clientCFrame end
             end)
         end
-
-        -- Spoofer
         if SPOOF_ENABLED and tick() - lastSpoof >= SPOOF_RATE then
             lastSpoof = tick()
             local realPos = hrp.Position
@@ -145,22 +138,18 @@ local function startDesync(char, hrp)
         elseif not SPOOF_ENABLED then
             fakePart.Position = Vector3.new(0, -9999, 0)
         end
-
-        -- Anti-aim: rapidly jitter CFrame rotation so hitbox is hard to track
         if ANTIAIM_ENABLED then
             antitick = antitick + dt * ANTIAIM_SPEED
-            local jitterAngle = math.sin(antitick * 20) * 60
-            local jitterAngle2 = math.cos(antitick * 15) * 30
+            local j1 = math.sin(antitick * 20) * 60
+            local j2 = math.cos(antitick * 15) * 30
             task.defer(function()
                 if hrp and hrp.Parent then
                     hrp.CFrame = CFrame.new(hrp.Position)
-                        * CFrame.Angles(0, math.rad(jitterAngle), 0)
-                        * CFrame.Angles(math.rad(jitterAngle2), 0, 0)
+                        * CFrame.Angles(0, math.rad(j1), 0)
+                        * CFrame.Angles(math.rad(j2), 0, 0)
                 end
             end)
         end
-
-        -- Speed
         if SPEED_ENABLED then
             local hum = char:FindFirstChildOfClass("Humanoid")
             if hum then hum.WalkSpeed = SPEED_AMOUNT end
@@ -168,18 +157,10 @@ local function startDesync(char, hrp)
     end)
 end
 
--- ============ BHOP ============
 local function setupBhop(char)
     local hrp = char:FindFirstChild("HumanoidRootPart")
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hrp or not hum then return end
-    table.insert(characterConnections, UserInputService.JumpRequest:Connect(function()
-        if not BHOP_ENABLED then return end
-        if hrp and hrp.AssemblyLinearVelocity.Y > -1 and hrp.AssemblyLinearVelocity.Y < 1 then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end))
-    -- Auto re-jump on land
     table.insert(characterConnections, hum.StateChanged:Connect(function(_, new)
         if not BHOP_ENABLED then return end
         if new == Enum.HumanoidStateType.Landed then
@@ -189,7 +170,6 @@ local function setupBhop(char)
     end))
 end
 
--- ============ AUTO TOGGLE LOGIC ============
 local function getFurthestSpawn(hrp)
     if not hrp then return nil end
     local furthest, dist = nil, -1
@@ -219,10 +199,7 @@ local function setupCharacter(char)
     buildGhost(char)
     startDesync(char, hrp)
     setupBhop(char)
-
-    -- Reset walkspeed on respawn
     humanoid.WalkSpeed = SPEED_ENABLED and SPEED_AMOUNT or 16
-
     if autoReturnEnabled and savedDeathCFrame then
         local cf = savedDeathCFrame
         savedDeathCFrame = nil
@@ -232,22 +209,14 @@ local function setupCharacter(char)
     else
         savedDeathCFrame = nil
     end
-
     isAlive = true
     Character = char
-
     table.insert(characterConnections, RunService.Heartbeat:Connect(function()
         if isAlive and hrp and hrp.Parent then lastCFrame = hrp.CFrame end
-        -- Keep speed updated live
-        if SPEED_ENABLED and humanoid and humanoid.Parent then
-            humanoid.WalkSpeed = SPEED_AMOUNT
-        elseif not SPEED_ENABLED and humanoid and humanoid.Parent then
-            if humanoid.WalkSpeed == SPEED_AMOUNT then
-                humanoid.WalkSpeed = 16
-            end
+        if not SPEED_ENABLED and humanoid and humanoid.Parent and humanoid.WalkSpeed == SPEED_AMOUNT then
+            humanoid.WalkSpeed = 16
         end
     end))
-
     table.insert(characterConnections, humanoid.HealthChanged:Connect(function(health)
         if not isAlive then return end
         if autoResetEnabled and health <= 1 then
@@ -261,7 +230,6 @@ local function setupCharacter(char)
             if sp then pcall(function() hrp.CFrame = CFrame.new(sp.Position + Vector3.new(0,5,0)) end) end
         end
     end))
-
     table.insert(characterConnections, humanoid.Died:Connect(function()
         isAlive = false
         if autoReturnEnabled and lastCFrame then savedDeathCFrame = lastCFrame end
@@ -279,33 +247,35 @@ gui.Name           = "MasterGui"
 gui.IgnoreGuiInset = true
 gui.Parent         = playerGui
 
-local FRAME_W = 160
-local FRAME_H = 440
+local FRAME_W = 170
+local TAB_H   = 28
+local BODY_H  = 160
 
-local frame = Instance.new("Frame")
-frame.Size             = UDim2.new(0, FRAME_W, 0, FRAME_H)
-frame.Position         = UDim2.new(0, 16, 0, 16)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-frame.BorderSizePixel  = 0
-frame.Active           = true
-frame.Selectable       = false
-frame.Parent           = gui
+-- Outer container
+local container = Instance.new("Frame")
+container.Size             = UDim2.new(0, FRAME_W, 0, TAB_H + BODY_H)
+container.Position         = UDim2.new(0, 16, 0, 16)
+container.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+container.BorderSizePixel  = 0
+container.Active           = true
+container.Selectable       = false
+container.Parent           = gui
 
-local accent = Instance.new("Frame", frame)
+local accent = Instance.new("Frame", container)
 accent.Size             = UDim2.new(0, 3, 1, 0)
 accent.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
 accent.BorderSizePixel  = 0
 
 -- ============ DRAG ============
 local dragging, dragStart, startPos
-frame.InputBegan:Connect(function(input)
+container.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging  = true
         dragStart = input.Position
-        startPos  = frame.Position
+        startPos  = container.Position
     end
 end)
-frame.InputEnded:Connect(function(input)
+container.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
     end
@@ -313,37 +283,72 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        frame.Position = UDim2.new(
+        container.Position = UDim2.new(
             startPos.X.Scale, startPos.X.Offset + delta.X,
             startPos.Y.Scale, startPos.Y.Offset + delta.Y
         )
     end
 end)
 
+-- ============ TAB BAR ============
+local tabBar = Instance.new("Frame", container)
+tabBar.Size             = UDim2.new(1, 0, 0, TAB_H)
+tabBar.Position         = UDim2.new(0, 0, 0, 0)
+tabBar.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+tabBar.BorderSizePixel  = 0
+
+local tabNames = {"DESYNC", "TOGGLE", "COMBAT"}
+local tabBtns  = {}
+local pages    = {}
+local TAB_W    = (FRAME_W - 3) / #tabNames
+
+for i, name in ipairs(tabNames) do
+    local tb = Instance.new("TextButton", tabBar)
+    tb.Size             = UDim2.new(0, TAB_W, 1, 0)
+    tb.Position         = UDim2.new(0, 3 + (i-1) * TAB_W, 0, 0)
+    tb.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+    tb.TextColor3       = Color3.fromRGB(100, 100, 100)
+    tb.Font             = Enum.Font.GothamBold
+    tb.TextSize         = 10
+    tb.Text             = name
+    tb.BorderSizePixel  = 0
+    tb.AutoButtonColor  = false
+    tabBtns[i] = tb
+
+    local page = Instance.new("Frame", container)
+    page.Size             = UDim2.new(1, 0, 0, BODY_H)
+    page.Position         = UDim2.new(0, 0, 0, TAB_H)
+    page.BackgroundTransparency = 1
+    page.BorderSizePixel  = 0
+    page.Visible          = false
+    pages[i] = page
+end
+
+-- Tab underline indicator
+local underline = Instance.new("Frame", tabBar)
+underline.Size             = UDim2.new(0, TAB_W, 0, 2)
+underline.Position         = UDim2.new(0, 3, 1, -2)
+underline.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+underline.BorderSizePixel  = 0
+
+local activeTab = 1
+local function switchTab(i)
+    activeTab = i
+    for j, page in ipairs(pages) do
+        page.Visible = (j == i)
+        tabBtns[j].TextColor3 = (j == i) and Color3.fromRGB(220,220,220) or Color3.fromRGB(100,100,100)
+    end
+    underline.Position = UDim2.new(0, 3 + (i-1) * TAB_W, 1, -2)
+end
+
+for i, tb in ipairs(tabBtns) do
+    tb.MouseButton1Click:Connect(function() switchTab(i) end)
+end
+
 -- ============ UI HELPERS ============
-local function sectionLabel(text, yPos)
-    local lbl = Instance.new("TextLabel", frame)
-    lbl.Size                  = UDim2.new(1, -12, 0, 26)
-    lbl.Position              = UDim2.new(0, 12, 0, yPos)
-    lbl.BackgroundTransparency = 1
-    lbl.Text                  = text
-    lbl.TextColor3            = Color3.fromRGB(220, 220, 220)
-    lbl.Font                  = Enum.Font.GothamBold
-    lbl.TextSize              = 13
-    lbl.TextXAlignment        = Enum.TextXAlignment.Left
-end
-
-local function divider(yPos)
-    local d = Instance.new("Frame", frame)
-    d.Size             = UDim2.new(1, -12, 0, 1)
-    d.Position         = UDim2.new(0, 12, 0, yPos)
-    d.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    d.BorderSizePixel  = 0
-end
-
-local function makeBtn(label, yPos, on)
-    local btn = Instance.new("TextButton", frame)
-    btn.Size             = UDim2.new(1, -24, 0, 28)
+local function makeBtn(parent, label, yPos, on)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size             = UDim2.new(1, -24, 0, 30)
     btn.Position         = UDim2.new(0, 12, 0, yPos)
     btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     btn.TextColor3       = on and Color3.fromRGB(220,220,220) or Color3.fromRGB(90,90,90)
@@ -369,43 +374,38 @@ local function setState(btn, tick, label, on)
     tick.BackgroundColor3 = on and Color3.fromRGB(220,220,220) or Color3.fromRGB(60,60,60)
 end
 
--- DESYNC
-sectionLabel("DESYNC", 4)
-divider(30)
-local desyncBtn, desyncTick = makeBtn("DESYNC",  36, true)
-local ghostBtn,  ghostTick  = makeBtn("GHOST",   70, true)
+local function divider(parent, yPos)
+    local d = Instance.new("Frame", parent)
+    d.Size             = UDim2.new(1, -12, 0, 1)
+    d.Position         = UDim2.new(0, 12, 0, yPos)
+    d.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    d.BorderSizePixel  = 0
+end
 
--- TOGGLES
-sectionLabel("TOGGLES", 108)
-divider(134)
-local resetBtn,   resetTick   = makeBtn("AUTO RESET",  140, false)
-local returnBtn,  returnTick  = makeBtn("AUTO RETURN", 174, false)
-local abandonBtn, abandonTick = makeBtn("ABANDONED",   208, false)
+-- ============ PAGE 1: DESYNC ============
+local p1 = pages[1]
+divider(p1, 0)
+local desyncBtn, desyncTick = makeBtn(p1, "DESYNC",  8,  true)
+local ghostBtn,  ghostTick  = makeBtn(p1, "GHOST",   46, true)
+divider(p1, 84)
+local spoofBtn,  spoofTick  = makeBtn(p1, "SPOOF",   92, true)
 
--- SPOOFER
-sectionLabel("SPOOFER", 246)
-divider(272)
-local spoofBtn, spoofTick = makeBtn("SPOOF", 278, true)
+-- ============ PAGE 2: TOGGLES ============
+local p2 = pages[2]
+divider(p2, 0)
+local resetBtn,   resetTick   = makeBtn(p2, "AUTO RESET",  8,  false)
+local returnBtn,  returnTick  = makeBtn(p2, "AUTO RETURN", 46, false)
+local abandonBtn, abandonTick = makeBtn(p2, "ABANDONED",   84, false)
 
--- MOVEMENT
-sectionLabel("MOVEMENT", 316)
-divider(342)
-local bhopBtn,  bhopTick  = makeBtn("BHOP",  348, false)
-local speedBtn, speedTick = makeBtn("SPEED", 382, false)
+-- ============ PAGE 3: COMBAT ============
+local p3 = pages[3]
+divider(p3, 0)
+local antitBtn, antitTick = makeBtn(p3, "ANTI-AIM", 8,  false)
+local bhopBtn,  bhopTick  = makeBtn(p3, "BHOP",     46, false)
+local speedBtn, speedTick = makeBtn(p3, "SPEED",    84, false)
 
--- COMBAT
-sectionLabel("COMBAT", 380)
-divider(406)
-local antitBtn, antitTick = makeBtn("ANTI-AIM", 378, false)
-
--- fix ypos overlap — recalculate cleanly
--- MOVEMENT at 316, COMBAT at 420
-local function reposition(btn, y) btn.Position = UDim2.new(0, 12, 0, y) end
-reposition(bhopBtn,  350)
-reposition(speedBtn, 384)
-sectionLabel("COMBAT", 318)
-divider(344)
-reposition(antitBtn, 350)
+-- show first tab
+switchTab(1)
 
 -- ============ BUTTON LOGIC ============
 desyncBtn.MouseButton1Click:Connect(function()
@@ -415,6 +415,10 @@ end)
 ghostBtn.MouseButton1Click:Connect(function()
     SHOW_GHOST = not SHOW_GHOST
     setState(ghostBtn, ghostTick, "GHOST", SHOW_GHOST)
+end)
+spoofBtn.MouseButton1Click:Connect(function()
+    SPOOF_ENABLED = not SPOOF_ENABLED
+    setState(spoofBtn, spoofTick, "SPOOF", SPOOF_ENABLED)
 end)
 resetBtn.MouseButton1Click:Connect(function()
     autoResetEnabled = not autoResetEnabled
@@ -429,9 +433,9 @@ abandonBtn.MouseButton1Click:Connect(function()
     setState(abandonBtn, abandonTick, "ABANDONED", abandonedEnabled)
     abandonedTriggered = false
 end)
-spoofBtn.MouseButton1Click:Connect(function()
-    SPOOF_ENABLED = not SPOOF_ENABLED
-    setState(spoofBtn, spoofTick, "SPOOF", SPOOF_ENABLED)
+antitBtn.MouseButton1Click:Connect(function()
+    ANTIAIM_ENABLED = not ANTIAIM_ENABLED
+    setState(antitBtn, antitTick, "ANTI-AIM", ANTIAIM_ENABLED)
 end)
 bhopBtn.MouseButton1Click:Connect(function()
     BHOP_ENABLED = not BHOP_ENABLED
@@ -442,8 +446,4 @@ speedBtn.MouseButton1Click:Connect(function()
     setState(speedBtn, speedTick, "SPEED", SPEED_ENABLED)
     local hum = Character and Character:FindFirstChildOfClass("Humanoid")
     if hum then hum.WalkSpeed = SPEED_ENABLED and SPEED_AMOUNT or 16 end
-end)
-antitBtn.MouseButton1Click:Connect(function()
-    ANTIAIM_ENABLED = not ANTIAIM_ENABLED
-    setState(antitBtn, antitTick, "ANTI-AIM", ANTIAIM_ENABLED)
 end)
